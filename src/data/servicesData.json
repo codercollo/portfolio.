@@ -1,0 +1,17 @@
+[
+  {
+    "icon": "🔗",
+    "title": "API Development & Integration",
+    "text": "Build fast, reliable REST APIs or gRPC services and connect your app to external systems like payments or messaging."
+  },
+  {
+    "icon": "⚙️",
+    "title": "Backend System Design & Optimization",
+    "text": "Create scalable, maintainable backends and optimize performance for smooth user experiences."
+  },
+  {
+    "icon": "🗄️",
+    "title": "Database & Data Management",
+    "text": "Design and manage SQL or NoSQL databases, ensuring efficient storage, queries, and data integrity."
+  }
+]

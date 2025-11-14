@@ -1,0 +1,53 @@
+[
+  {
+    "id": "1",
+    "title": "E-Commerce Platform",
+    "role": "Web Application",
+    "description": "Full-stack marketplace built with Go, PostgreSQL, and HTMX. Real-time inventory management and payment processing.",
+    "tech": ["Go", "PostgreSQL", "HTMX", "Redis", "Stripe"],
+    "link": "https://example.com",
+    "repo": "https://github.com/collocoder/ecommerce-platform"
+  },
+  {
+    "id": "2",
+    "title": "Microservices Architecture",
+    "role": "Backend Services",
+    "description": "Designed and implemented scalable Go microservices with gRPC and REST APIs. Includes service discovery, load balancing, and centralized logging.",
+    "tech": ["Go", "gRPC", "Docker", "Kubernetes", "Prometheus"],
+    "repo": "https://github.com/collocoder/microservices-demo"
+  },
+  {
+    "id": "3",
+    "title": "API Gateway",
+    "role": "API Development",
+    "description": "High-performance API gateway handling 10k+ requests per second. Built with Go and Redis for caching and rate limiting.",
+    "tech": ["Go", "Redis", "JWT", "Docker"],
+    "link": "https://api-demo.example.com",
+    "repo": "https://github.com/collocoder/api-gateway"
+  },
+  {
+    "id": "4",
+    "title": "Real-Time Chat Application",
+    "role": "Full Stack",
+    "description": "WebSocket-based chat app with user authentication, message persistence, and typing indicators. Built with Go backend and React frontend.",
+    "tech": ["Go", "WebSocket", "React", "PostgreSQL"],
+    "link": "https://chat.example.com",
+    "repo": "https://github.com/collocoder/realtime-chat"
+  },
+  {
+    "id": "5",
+    "title": "Task Management CLI",
+    "role": "Developer Tool",
+    "description": "Command-line task manager with local storage, reminders, and priority sorting. Written in Go with Cobra framework.",
+    "tech": ["Go", "Cobra", "SQLite"],
+    "repo": "https://github.com/collocoder/task-cli"
+  },
+  {
+    "id": "6",
+    "title": "Authentication Service",
+    "role": "Microservice",
+    "description": "OAuth2 authentication microservice with JWT tokens, refresh tokens, and social login integration (Google, GitHub).",
+    "tech": ["Go", "OAuth2", "JWT", "PostgreSQL", "Redis"],
+    "repo": "https://github.com/collocoder/auth-service"
+  }
+]
