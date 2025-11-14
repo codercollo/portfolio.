@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom"; // <- Import Link
 import Hero from "../components/Hero";
 import Services from "../components/Services";
 import useProjects from "../hooks/useProjects";
@@ -6,7 +7,6 @@ import ProjectCard from "../components/ProjectCard";
 
 export default function Home() {
   const { projects } = useProjects();
-  // Show only first 3 projects as featured
   const featuredProjects = projects.slice(0, 3);
 
   return (
@@ -46,24 +46,24 @@ export default function Home() {
                     <p className="text-[#666] mb-6 md:mb-8 leading-relaxed text-sm md:text-base">
                       Full-stack marketplace built with Go, PostgreSQL, and HTMX. Real-time inventory management and payment processing.
                     </p>
-                    <a
-                      href="/projects"
+                    <Link
+                      to="/projects"
                       className="inline-block px-6 md:px-8 py-3 bg-transparent border-2 border-white text-white font-mono text-xs md:text-sm font-semibold uppercase tracking-wider transition-all hover:bg-white hover:text-[#0d0d0d] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_#00ff88]"
                     >
                       View Project
-                    </a>
+                    </Link>
                   </div>
                 ))}
           </div>
 
           {/* View All Projects Link */}
           <div className="mt-12 md:mt-16 text-center">
-            <a
-              href="/projects"
+            <Link
+              to="/projects"
               className="inline-block px-8 md:px-10 py-4 md:py-5 font-mono text-sm md:text-base font-bold uppercase tracking-wider border-4 transition-all bg-transparent text-white border-white hover:bg-white hover:text-[#0d0d0d] hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0_#00ff88]"
             >
               View All Projects
-            </a>
+            </Link>
           </div>
         </div>
       </section>
@@ -77,12 +77,12 @@ export default function Home() {
           <p className="text-lg md:text-xl text-[#666] mb-10 md:mb-12 leading-relaxed max-w-2xl mx-auto">
             Have a project in mind? Let's discuss how we can work together to bring your ideas to life.
           </p>
-          <a
-            href="/contact"
+          <Link
+            to="/contact"
             className="inline-block px-10 md:px-12 py-5 md:py-6 font-mono text-base md:text-lg font-bold uppercase tracking-wider border-4 transition-all bg-[#00ff88] text-[#0d0d0d] border-[#00ff88] hover:bg-white hover:border-white hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0_white]"
           >
             Start a Project
-          </a>
+          </Link>
         </div>
       </section>
     </div>
