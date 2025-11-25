@@ -7,7 +7,7 @@ export default function Contact() {
     email: "",
     message: "",
   });
-  const [status, setStatus] = useState(""); // For showing success/error
+  const [status, setStatus] = useState(""); // Show success/error
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -18,17 +18,19 @@ export default function Contact() {
     setStatus("Sending...");
 
     try {
-      // Convert to URLSearchParams for application/x-www-form-urlencoded
-      const params = new URLSearchParams();
-      params.append("name", formData.name);
-      params.append("email", formData.email);
-      params.append("message", formData.message);
-
-      await axios.post("http://localhost:8080/send-email", params, {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
+      await axios.post(
+        "https://portfolio-2-cgw0.onrender.com/send-email", // <--- deployed backend
+        {
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
         },
-      });
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       setStatus("Message sent successfully!");
       setFormData({ name: "", email: "", message: "" });
@@ -40,7 +42,7 @@ export default function Contact() {
 
   return (
     <>
-      {/* Contact Hero Section */}
+      {/* Hero Section */}
       <section className="relative py-24 md:py-36 px-6 md:px-12 lg:px-16 bg-[#0d0d0d] overflow-hidden">
         <div className="max-w-3xl mx-auto text-center relative z-10">
           <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-semibold uppercase tracking-tight mb-6 relative inline-block after:absolute after:bottom-[-10px] after:left-1/2 after:-translate-x-1/2 after:w-24 after:h-1.5 after:bg-[#00ff88] text-white leading-relaxed">
@@ -50,21 +52,9 @@ export default function Contact() {
             Got a project or idea? Drop a message and let's make it happen together.
           </p>
         </div>
-
-        {/* Decorative shapes */}
-        <div className="absolute top-0 left-0 w-64 h-64 bg-[#00ff88]/10 rounded-full blur-3xl animate-pulse-slow"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#4d9fff]/10 rounded-full blur-3xl animate-pulse-slow"></div>
-
-        {/* Animated Scroll Arrow */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
-          <a href="#contact-form" className="flex flex-col items-center gap-2 animate-bounce">
-            <span className="block w-3 h-3 border-b-2 border-r-2 border-[#00ff88] rotate-45 mb-1"></span>
-            <span className="block w-3 h-3 border-b-2 border-r-2 border-[#00ff88] rotate-45"></span>
-          </a>
-        </div>
       </section>
 
-      {/* Contact Form Section */}
+      {/* Contact Form */}
       <section id="contact-form" className="relative py-20 md:py-32 px-6 md:px-12 lg:px-16 bg-[#1a1a1a]">
         <div className="max-w-xl mx-auto">
           <div className="bg-[#0d0d0d] p-10 md:p-12 rounded-3xl shadow-lg">

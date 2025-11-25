@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,28 +11,39 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func main() {
-	godotenv.Load() // Load environment variables from .env
+type ContactForm struct {
+	Name    string `json:"name"`
+	Email   string `json:"email"`
+	Message string `json:"message"`
+}
 
-	// Route with CORS wrapper
+func main() {
+	godotenv.Load() // Load .env locally
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
 	http.HandleFunc("/send-email", cors(sendEmailHandler))
 
-	fmt.Println("Backend running on http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", nil)) // Start server
+	fmt.Printf("Backend running on port %s\n", port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
 // --- CORS middleware ---
 func cors(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Allow frontend access
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Origin", "*") // Replace "*" with your frontend URL in production
 		w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
 		if r.Method == "OPTIONS" {
-			return // Preflight request
+			w.WriteHeader(http.StatusOK)
+			return
 		}
-		handler(w, r) // Continue to handler
+
+		handler(w, r)
 	}
 }
 
@@ -42,32 +54,28 @@ func sendEmailHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	r.ParseForm() // Parse form fields
+	var form ContactForm
+	err := json.NewDecoder(r.Body).Decode(&form)
+	if err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
 
-	// Extract form data
-	name := r.Form.Get("name")
-	email := r.Form.Get("email")
-	message := r.Form.Get("message")
-
-	// SMTP credentials
 	from := os.Getenv("SMTP_EMAIL")
 	password := os.Getenv("SMTP_PASSWORD")
 	to := []string{os.Getenv("SMTP_EMAIL")} // Send to yourself
 
-	// SMTP server info
 	smtpHost := os.Getenv("SMTP_HOST")
 	smtpPort := os.Getenv("SMTP_PORT")
 
-	// Email content
 	body := fmt.Sprintf(
 		"Name: %s\nEmail: %s\n\nMessage:\n%s",
-		name, email, message,
+		form.Name, form.Email, form.Message,
 	)
 
 	auth := smtp.PlainAuth("", from, password, smtpHost)
 
-	// Send email
-	err := smtp.SendMail(
+	err = smtp.SendMail(
 		smtpHost+":"+smtpPort,
 		auth,
 		from,
@@ -80,5 +88,6 @@ func sendEmailHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Email sent successfully"))
 }
