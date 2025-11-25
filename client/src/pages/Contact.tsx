@@ -1,9 +1,46 @@
-import React from "react";
+import React, { useState } from "react";
+import axios from "axios";
 
 export default function Contact() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+  const [status, setStatus] = useState(""); // For showing success/error
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus("Sending...");
+
+    try {
+      // Convert to URLSearchParams for application/x-www-form-urlencoded
+      const params = new URLSearchParams();
+      params.append("name", formData.name);
+      params.append("email", formData.email);
+      params.append("message", formData.message);
+
+      await axios.post("http://localhost:8080/send-email", params, {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      });
+
+      setStatus("Message sent successfully!");
+      setFormData({ name: "", email: "", message: "" });
+    } catch (error) {
+      console.error(error);
+      setStatus("Failed to send message. Try again later.");
+    }
+  };
+
   return (
     <>
-      {/* Contact Hero */}
+      {/* Contact Hero Section */}
       <section className="relative py-24 md:py-36 px-6 md:px-12 lg:px-16 bg-[#0d0d0d] overflow-hidden">
         <div className="max-w-3xl mx-auto text-center relative z-10">
           <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-semibold uppercase tracking-tight mb-6 relative inline-block after:absolute after:bottom-[-10px] after:left-1/2 after:-translate-x-1/2 after:w-24 after:h-1.5 after:bg-[#00ff88] text-white leading-relaxed">
@@ -27,14 +64,14 @@ export default function Contact() {
         </div>
       </section>
 
-      {/* Centered Contact Form */}
+      {/* Contact Form Section */}
       <section id="contact-form" className="relative py-20 md:py-32 px-6 md:px-12 lg:px-16 bg-[#1a1a1a]">
         <div className="max-w-xl mx-auto">
           <div className="bg-[#0d0d0d] p-10 md:p-12 rounded-3xl shadow-lg">
             <h2 className="font-display text-3xl md:text-4xl font-semibold uppercase tracking-tight mb-8 text-center text-white leading-relaxed">
               Send a Message
             </h2>
-            <form className="space-y-6 md:space-y-8">
+            <form className="space-y-6 md:space-y-8" onSubmit={handleSubmit}>
               <div>
                 <label className="block font-mono text-xs md:text-sm uppercase tracking-wider mb-2 text-[#00ff88] font-medium">
                   Name
@@ -44,6 +81,8 @@ export default function Contact() {
                   name="name"
                   placeholder="John Doe"
                   required
+                  value={formData.name}
+                  onChange={handleChange}
                   className="w-full px-5 py-4 bg-[#1a1a1a] border-2 border-[#2d2d2d] rounded-lg text-white focus:outline-none focus:border-[#00ff88] transition-all leading-loose"
                 />
               </div>
@@ -57,6 +96,8 @@ export default function Contact() {
                   name="email"
                   placeholder="john@example.com"
                   required
+                  value={formData.email}
+                  onChange={handleChange}
                   className="w-full px-5 py-4 bg-[#1a1a1a] border-2 border-[#2d2d2d] rounded-lg text-white focus:outline-none focus:border-[#00ff88] transition-all leading-loose"
                 />
               </div>
@@ -70,6 +111,8 @@ export default function Contact() {
                   rows={6}
                   placeholder="Your message..."
                   required
+                  value={formData.message}
+                  onChange={handleChange}
                   className="w-full px-5 py-4 bg-[#1a1a1a] border-2 border-[#2d2d2d] rounded-lg text-white focus:outline-none focus:border-[#00ff88] transition-all resize-none leading-loose"
                 ></textarea>
               </div>
@@ -82,7 +125,11 @@ export default function Contact() {
               </button>
             </form>
 
-            <div id="form-response" className="mt-6 md:mt-8 text-center text-white"></div>
+            {status && (
+              <div id="form-response" className="mt-6 md:mt-8 text-center text-white">
+                {status}
+              </div>
+            )}
           </div>
         </div>
       </section>
