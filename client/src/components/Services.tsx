@@ -1,4 +1,4 @@
-import React from "react";
+
 import { useServices } from "../hooks/useServices";
 
 export default function Services() {

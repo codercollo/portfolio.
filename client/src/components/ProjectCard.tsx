@@ -1,5 +1,5 @@
 // ProjectCard.tsx
-import React from "react";
+
 import type { Project } from "../types";
 
 export default function ProjectCard({ project }: { project: Project }) {

@@ -1,4 +1,4 @@
-import React from "react";
+
 import ProjectCard from "../components/ProjectCard";
 import projectsData from "../data/projectsData.json"; 
 import type { Project } from "../types";

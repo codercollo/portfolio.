@@ -1,4 +1,4 @@
-import React from "react";
+
 import illustration from "../assets/img/illustration.png";
 
 export default function Hero() {
