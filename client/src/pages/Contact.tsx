@@ -13,32 +13,29 @@ export default function Contact() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatus("Sending...");
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault(); // <-- prevents page reload
 
-    try {
-      await axios.post(
-        "https://portfolio-2-cgw0.onrender.com/send-email", // <--- deployed backend
-        {
-          name: formData.name,
-          email: formData.email,
-          message: formData.message,
+  setStatus("Sending...");
+
+  try {
+    await axios.post(
+      "https://portfolio-2-cgw0.onrender.com/send-email", // deployed backend
+      formData,
+      {
+        headers: {
+          "Content-Type": "application/json",
         },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      }
+    );
 
-      setStatus("Message sent successfully!");
-      setFormData({ name: "", email: "", message: "" });
-    } catch (error) {
-      console.error(error);
-      setStatus("Failed to send message. Try again later.");
-    }
-  };
+    setStatus("Message sent successfully!");
+    setFormData({ name: "", email: "", message: "" });
+  } catch (error) {
+    console.error(error);
+    setStatus("Failed to send message. Try again later.");
+  }
+};
 
   return (
     <>
