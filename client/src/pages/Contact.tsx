@@ -20,7 +20,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
   try {
     await axios.post(
-      "https://portfolio-ag1o.onrender.com", // deployed backend
+      "https://portfolio-ag1o.onrender.com/send-email", // deployed backend
       formData,
       {
         headers: {
