@@ -7,35 +7,40 @@ export default function Contact() {
     email: "",
     message: "",
   });
-  const [status, setStatus] = useState(""); // Show success/error
+  const [status, setStatus] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault(); // <-- prevents page reload
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setStatus("Sending...");
 
-  setStatus("Sending...");
+    try {
+      await axios.post(
+        "https://portfolio-1aju.onrender.com/send-email",
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-  try {
-    await axios.post(
-      "https://portfolio-ag1o.onrender.com/send-email", // deployed backend
-      formData,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+      setStatus("Message sent successfully!");
+      setFormData({ name: "", email: "", message: "" });
 
-    setStatus("Message sent successfully!");
-    setFormData({ name: "", email: "", message: "" });
-  } catch (error) {
-    console.error(error);
-    setStatus("Failed to send message. Try again later.");
-  }
-};
+      // Clear status after 3 seconds
+      setTimeout(() => setStatus(""), 3000);
+    } catch (error) {
+      console.error(error);
+      setStatus("Failed to send message. Try again later.");
+
+      // Clear status after 3 seconds
+      setTimeout(() => setStatus(""), 3000);
+    }
+  };
 
   return (
     <>
@@ -70,7 +75,8 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                   required
                   value={formData.name}
                   onChange={handleChange}
-                  className="w-full px-5 py-4 bg-[#1a1a1a] border-2 border-[#2d2d2d] rounded-lg text-white focus:outline-none focus:border-[#00ff88] transition-all leading-loose"
+                  disabled={status === "Sending..."}
+                  className="w-full px-5 py-4 bg-[#1a1a1a] border-2 border-[#2d2d2d] rounded-lg text-white focus:outline-none focus:border-[#00ff88] transition-all leading-loose disabled:opacity-50"
                 />
               </div>
 
@@ -85,7 +91,8 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-5 py-4 bg-[#1a1a1a] border-2 border-[#2d2d2d] rounded-lg text-white focus:outline-none focus:border-[#00ff88] transition-all leading-loose"
+                  disabled={status === "Sending..."}
+                  className="w-full px-5 py-4 bg-[#1a1a1a] border-2 border-[#2d2d2d] rounded-lg text-white focus:outline-none focus:border-[#00ff88] transition-all leading-loose disabled:opacity-50"
                 />
               </div>
 
@@ -100,20 +107,27 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                   required
                   value={formData.message}
                   onChange={handleChange}
-                  className="w-full px-5 py-4 bg-[#1a1a1a] border-2 border-[#2d2d2d] rounded-lg text-white focus:outline-none focus:border-[#00ff88] transition-all resize-none leading-loose"
+                  disabled={status === "Sending..."}
+                  className="w-full px-5 py-4 bg-[#1a1a1a] border-2 border-[#2d2d2d] rounded-lg text-white focus:outline-none focus:border-[#00ff88] transition-all resize-none leading-loose disabled:opacity-50"
                 ></textarea>
               </div>
 
               <button
                 type="submit"
-                className="w-full md:w-auto px-12 py-4 bg-gradient-to-r from-[#00ff88] to-[#4d9fff] text-[#0d0d0d] font-mono font-medium uppercase rounded-lg tracking-wider transition-all hover:-translate-y-1 hover:shadow-[6px_6px_0_white]"
+                disabled={status === "Sending..."}
+                className="w-full md:w-auto px-12 py-4 bg-gradient-to-r from-[#00ff88] to-[#4d9fff] text-[#0d0d0d] font-mono font-medium uppercase rounded-lg tracking-wider transition-all hover:-translate-y-1 hover:shadow-[6px_6px_0_white] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Send Message
+                {status === "Sending..." ? "Sending..." : "Send Message"}
               </button>
             </form>
 
-            {status && (
-              <div id="form-response" className="mt-6 md:mt-8 text-center text-white">
+            {status && status !== "Sending..." && (
+              <div
+                id="form-response"
+                className={`mt-6 md:mt-8 text-center font-mono ${
+                  status.includes("success") ? "text-[#00ff88]" : "text-red-500"
+                }`}
+              >
                 {status}
               </div>
             )}
