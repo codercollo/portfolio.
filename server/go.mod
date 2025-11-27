@@ -1,4 +1,4 @@
-module github.com/codercollo/portfolio/server
+module github.com/codercollo/porfolio/server
 
 go 1.25.0
 
