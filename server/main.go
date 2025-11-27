@@ -29,7 +29,6 @@ func main() {
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
-// CORS Middleware
 func cors(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -43,7 +42,6 @@ func cors(handler http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// Email Handler
 func sendEmailHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Invalid method", http.StatusMethodNotAllowed)
@@ -65,35 +63,36 @@ func sendEmailHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Create message
 	subject := "Subject: Portfolio Contact Form\r\n"
-	body := fmt.Sprintf(
-		"From: %s\r\nTo: %s\r\n%s\r\nName: %s\r\nEmail: %s\r\n\r\nMessage:\r\n%s",
-		from, to, subject, form.Name, form.Email, form.Message,
-	)
+	mime := "MIME-version: 1.0;\r\nContent-Type: text/plain; charset=\"UTF-8\";\r\n\r\n"
+	body := fmt.Sprintf("Name: %s\r\nEmail: %s\r\n\r\nMessage:\r\n%s", form.Name, form.Email, form.Message)
+	message := []byte(subject + mime + body)
 
 	// Setup authentication
 	auth := smtp.PlainAuth("", from, password, smtpHost)
 
-	// Connect to the server with TLS
-	addr := smtpHost + ":" + smtpPort
-
-	// Connect to server
-	client, err := smtp.Dial(addr)
-	if err != nil {
-		log.Printf("Dial error: %v", err)
-		http.Error(w, "Failed to connect to SMTP server: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer client.Close()
-
-	// Start TLS
+	// TLS config
 	tlsConfig := &tls.Config{
 		ServerName: smtpHost,
 	}
-	if err = client.StartTLS(tlsConfig); err != nil {
-		log.Printf("StartTLS error: %v", err)
-		http.Error(w, "Failed to start TLS: "+err.Error(), http.StatusInternalServerError)
+
+	// Connect to SMTP server with TLS
+	addr := smtpHost + ":" + smtpPort
+	conn, err := tls.Dial("tcp", addr, tlsConfig)
+	if err != nil {
+		log.Printf("TLS Dial error: %v", err)
+		http.Error(w, "Failed to connect to SMTP server: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	defer conn.Close()
+
+	// Create SMTP client
+	client, err := smtp.NewClient(conn, smtpHost)
+	if err != nil {
+		log.Printf("SMTP client error: %v", err)
+		http.Error(w, "Failed to create SMTP client: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer client.Close()
 
 	// Authenticate
 	if err = client.Auth(auth); err != nil {
@@ -123,12 +122,13 @@ func sendEmailHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer wc.Close()
 
-	if _, err = wc.Write([]byte(body)); err != nil {
+	if _, err = wc.Write(message); err != nil {
 		log.Printf("Write error: %v", err)
-		http.Error(w, "Failed to write email body: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Failed to write email: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	log.Println("Email sent successfully!")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Email sent successfully"))
 }
