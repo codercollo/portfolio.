@@ -18,7 +18,7 @@ type ContactForm struct {
 }
 
 func main() {
-	godotenv.Load() // Load .env locally
+	godotenv.Load()
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -31,10 +31,10 @@ func main() {
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
-// --- CORS middleware ---
+// CORS Middleware
 func cors(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*") // Replace "*" with your frontend URL in production
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
@@ -47,7 +47,7 @@ func cors(handler http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// --- Email handler ---
+// Email Handler
 func sendEmailHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Invalid method", http.StatusMethodNotAllowed)
