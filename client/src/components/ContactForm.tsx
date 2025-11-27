@@ -10,9 +10,28 @@ export default function ContactForm() {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
   }
 
-  function onSubmit(e: React.FormEvent) {
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setStatus("sent");
+    setStatus("idle");
+
+    try {
+      const res = await fetch( "https://portfolio-ag1o.onrender.com/send-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      if (!res.ok) throw new Error("Failed to send email");
+
+      setStatus("sent");
+      setForm({ name: "", email: "", message: "" }); // Clear form
+    } catch (err) {
+      console.error(err);
+      setStatus("error");
+    }
+
     setTimeout(() => setStatus("idle"), 3000);
   }
 
@@ -66,9 +85,16 @@ export default function ContactForm() {
         >
           Send Message
         </button>
+
         {status === "sent" && (
           <span className="text-sm font-mono text-[#00ff88] uppercase tracking-wider animate-pulse">
             ✓ Message sent!
+          </span>
+        )}
+
+        {status === "error" && (
+          <span className="text-sm font-mono text-red-500 uppercase tracking-wider">
+            Error sending email!
           </span>
         )}
       </div>
