@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 export default function ContactForm() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
-  const [status, setStatus] = useState<"idle" | "sent" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
   function onChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -12,10 +12,10 @@ export default function ContactForm() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setStatus("idle");
+    setStatus("sending");
 
     try {
-      const res = await fetch( "https://portfolio-ag1o.onrender.com/send-email", {
+      const res = await fetch("https://portfolio-1aju.onrender.com/send-email", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -26,13 +26,17 @@ export default function ContactForm() {
       if (!res.ok) throw new Error("Failed to send email");
 
       setStatus("sent");
-      setForm({ name: "", email: "", message: "" }); // Clear form
+      setForm({ name: "", email: "", message: "" });
+      
+      // Reset status after 3 seconds
+      setTimeout(() => setStatus("idle"), 3000);
     } catch (err) {
       console.error(err);
       setStatus("error");
+      
+      // Reset status after 3 seconds
+      setTimeout(() => setStatus("idle"), 3000);
     }
-
-    setTimeout(() => setStatus("idle"), 3000);
   }
 
   return (
@@ -45,7 +49,8 @@ export default function ContactForm() {
           name="name"
           value={form.name}
           onChange={onChange}
-          className="mt-2 block w-full bg-[#0d0d0d] border-4 border-[#2d2d2d] text-white px-5 py-4 font-mono transition-all focus:border-[#00ff88] focus:outline-none"
+          disabled={status === "sending"}
+          className="mt-2 block w-full bg-[#0d0d0d] border-4 border-[#2d2d2d] text-white px-5 py-4 font-mono transition-all focus:border-[#00ff88] focus:outline-none disabled:opacity-50"
           required
         />
       </label>
@@ -59,7 +64,8 @@ export default function ContactForm() {
           type="email"
           value={form.email}
           onChange={onChange}
-          className="mt-2 block w-full bg-[#0d0d0d] border-4 border-[#2d2d2d] text-white px-5 py-4 font-mono transition-all focus:border-[#00ff88] focus:outline-none"
+          disabled={status === "sending"}
+          className="mt-2 block w-full bg-[#0d0d0d] border-4 border-[#2d2d2d] text-white px-5 py-4 font-mono transition-all focus:border-[#00ff88] focus:outline-none disabled:opacity-50"
           required
         />
       </label>
@@ -73,7 +79,8 @@ export default function ContactForm() {
           value={form.message}
           onChange={onChange}
           rows={6}
-          className="mt-2 block w-full bg-[#0d0d0d] border-4 border-[#2d2d2d] text-white px-5 py-4 font-mono transition-all focus:border-[#00ff88] focus:outline-none resize-none"
+          disabled={status === "sending"}
+          className="mt-2 block w-full bg-[#0d0d0d] border-4 border-[#2d2d2d] text-white px-5 py-4 font-mono transition-all focus:border-[#00ff88] focus:outline-none resize-none disabled:opacity-50"
           required
         />
       </label>
@@ -81,9 +88,10 @@ export default function ContactForm() {
       <div className="flex items-center gap-6">
         <button
           type="submit"
-          className="px-10 py-5 font-mono text-base font-bold uppercase tracking-wider border-4 transition-all bg-[#00ff88] text-[#0d0d0d] border-[#00ff88] hover:bg-white hover:border-white hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0_white]"
+          disabled={status === "sending"}
+          className="px-10 py-5 font-mono text-base font-bold uppercase tracking-wider border-4 transition-all bg-[#00ff88] text-[#0d0d0d] border-[#00ff88] hover:bg-white hover:border-white hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0_white] disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Send Message
+          {status === "sending" ? "Sending..." : "Send Message"}
         </button>
 
         {status === "sent" && (
