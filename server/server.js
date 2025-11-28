@@ -12,10 +12,12 @@ const PORT = process.env.PORT || 3001;
 // Email transporter
 // -------------------
 const transporter = nodemailer.createTransport({
-  service: process.env.EMAIL_SERVICE || "gmail",
+  host: "smtp.gmail.com",   // explicit Gmail SMTP
+  port: 465,                // SSL port
+  secure: true,             // true for 465
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD, // Use Gmail App Password
+    pass: process.env.EMAIL_PASSWORD, // Gmail App Password
   },
 });
 
@@ -28,12 +30,10 @@ transporter.verify((err) => {
 // -------------------
 // CORS Configuration
 // -------------------
-
-// Allowed origins: local dev + deployed frontend
 const allowedOrigins = [
-  "http://localhost:5173", // Vite dev server
-  "http://localhost:3000", // CRA dev server (optional)
-  "https://your-frontend-on-render.com", // <--- Replace with your deployed frontend URL
+  "http://localhost:5173",           // Vite dev server
+  "http://localhost:3000",           // CRA dev server
+  "https://portfolio-papk.onrender.com", // Deployed frontend
 ];
 
 app.use(
