@@ -12,16 +12,15 @@ const PORT = process.env.PORT || 3001;
 // Email transporter
 // -------------------
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",   // explicit Gmail SMTP
-  port: 465,                // SSL port
-  secure: true,             // true for 465
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD, // Gmail App Password
+    pass: process.env.EMAIL_PASSWORD,
   },
 });
 
-// Verify mail server
 transporter.verify((err) => {
   if (err) console.error("Email config error:", err);
   else console.log("Email server ready");
@@ -31,25 +30,28 @@ transporter.verify((err) => {
 // CORS Configuration
 // -------------------
 const allowedOrigins = [
-  "http://localhost:5173",           // Vite dev server
-  "http://localhost:3000",           // CRA dev server
-  "https://portfolio-papk.onrender.com", // Deployed frontend
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://your-frontend-on-render.com", // replace with your frontend URL
 ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        console.warn("Blocked CORS request from origin:", origin);
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    methods: ["GET", "POST", "OPTIONS"],
-    credentials: true,
-  })
-);
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization"
+  );
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200); // respond OK to preflight
+  }
+  next();
+});
 
 // -------------------
 // Middleware
@@ -57,22 +59,21 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// -------------------
 // Validation Middleware
+// -------------------
 const validateEmailRequest = (req, res, next) => {
   const { name, email, message } = req.body;
 
-  if (!name || !email || !message) {
+  if (!name || !email || !message)
     return res.status(400).json({ error: "Missing required fields" });
-  }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
+  if (!emailRegex.test(email))
     return res.status(400).json({ error: "Invalid email address" });
-  }
 
-  if (name.length > 100 || message.length > 5000) {
+  if (name.length > 100 || message.length > 5000)
     return res.status(400).json({ error: "Field length exceeded" });
-  }
 
   next();
 };
@@ -80,13 +81,10 @@ const validateEmailRequest = (req, res, next) => {
 // -------------------
 // Routes
 // -------------------
-
-// Root
 app.get("/", (req, res) => {
   res.json({ status: "Portfolio email service running" });
 });
 
-// Send email
 app.post("/send-email", validateEmailRequest, async (req, res) => {
   const { name, email, message } = req.body;
 
@@ -119,7 +117,9 @@ app.post("/send-email", validateEmailRequest, async (req, res) => {
   }
 });
 
+// -------------------
 // 404 fallback
+// -------------------
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });
 });
