@@ -23,11 +23,25 @@ transporter.verify((err) => {
   else console.log("Email server ready");
 });
 
-// CORS (for local development)
+// CORS (for local development + Render frontend)
+const allowedOrigins = [
+  "http://localhost:5173",   // local Vite dev server
+  "http://localhost:3000",   // if using CRA
+  "https://your-frontend-url.onrender.com", // replace with your deployed frontend URL
+];
+
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:3000"],
-    methods: ["GET", "POST"],
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like Postman) or allowed origins
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "OPTIONS"],
+    credentials: true,
   })
 );
 
@@ -50,7 +64,7 @@ const validateEmailRequest = (req, res, next) => {
 
 // Root
 app.get("/", (req, res) => {
-  res.json({ status: "Portfolio email service running (LOCAL)" });
+  res.json({ status: "Portfolio email service running" });
 });
 
 // Send email
