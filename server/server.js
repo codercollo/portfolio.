@@ -8,12 +8,14 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// -------------------
 // Email transporter
+// -------------------
 const transporter = nodemailer.createTransport({
   service: process.env.EMAIL_SERVICE || "gmail",
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
+    pass: process.env.EMAIL_PASSWORD, // Use Gmail App Password
   },
 });
 
@@ -23,20 +25,24 @@ transporter.verify((err) => {
   else console.log("Email server ready");
 });
 
-// CORS (for local development + Render frontend)
+// -------------------
+// CORS Configuration
+// -------------------
+
+// Allowed origins: local dev + deployed frontend
 const allowedOrigins = [
-  "http://localhost:5173",   // local Vite dev server
-  "http://localhost:3000",   // if using CRA
-  "https://your-frontend-url.onrender.com", // replace with your deployed frontend URL
+  "http://localhost:5173", // Vite dev server
+  "http://localhost:3000", // CRA dev server (optional)
+  "https://your-frontend-on-render.com", // <--- Replace with your deployed frontend URL
 ];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (like Postman) or allowed origins
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        console.warn("Blocked CORS request from origin:", origin);
         callback(new Error("Not allowed by CORS"));
       }
     },
@@ -45,6 +51,9 @@ app.use(
   })
 );
 
+// -------------------
+// Middleware
+// -------------------
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -52,15 +61,25 @@ app.use(express.urlencoded({ extended: true }));
 const validateEmailRequest = (req, res, next) => {
   const { name, email, message } = req.body;
 
-  if (!name || !email || !message)
+  if (!name || !email || !message) {
     return res.status(400).json({ error: "Missing required fields" });
+  }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email))
+  if (!emailRegex.test(email)) {
     return res.status(400).json({ error: "Invalid email address" });
+  }
+
+  if (name.length > 100 || message.length > 5000) {
+    return res.status(400).json({ error: "Field length exceeded" });
+  }
 
   next();
 };
+
+// -------------------
+// Routes
+// -------------------
 
 // Root
 app.get("/", (req, res) => {
@@ -78,17 +97,22 @@ app.post("/send-email", validateEmailRequest, async (req, res) => {
     subject: `Portfolio Contact: Message from ${name}`,
     text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
     html: `
-      <h2>New Contact Message</h2>
-      <p><strong>Name:</strong> ${name}</p>
-      <p><strong>Email:</strong> ${email}</p>
-      <p>${message}</p>
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #00ff88;">New Contact Message</h2>
+        <div style="background: #f5f5f5; padding: 20px; border-radius: 8px;">
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
+          <h3>Message:</h3>
+          <p style="white-space: pre-wrap;">${message}</p>
+        </div>
+      </div>
     `,
   };
 
   try {
     await transporter.sendMail(mailOptions);
     console.log(`Email sent from: ${email}`);
-    res.json({ success: true, message: "Email sent successfully" });
+    res.status(200).json({ success: true, message: "Email sent successfully" });
   } catch (err) {
     console.error("Error sending email:", err);
     res.status(500).json({ error: "Failed to send email" });
@@ -100,6 +124,9 @@ app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });
 });
 
+// -------------------
+// Start server
+// -------------------
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
