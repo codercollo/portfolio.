@@ -20,11 +20,15 @@ export default function Contact() {
     setStatus("Sending...");
 
     try {
-      await axios.post("http://localhost:3001/send-email", formData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      await axios.post(
+        "https://portfolio-papk.onrender.com/send-email",
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       setStatus("Message sent successfully!");
       setFormData({ name: "", email: "", message: "" });
@@ -120,9 +124,7 @@ export default function Contact() {
             {status && status !== "Sending..." && (
               <div
                 className={`mt-6 text-center ${
-                  status.includes("success")
-                    ? "text-[#00ff88]"
-                    : "text-red-500"
+                  status.includes("success") ? "text-[#00ff88]" : "text-red-500"
                 }`}
               >
                 {status}
