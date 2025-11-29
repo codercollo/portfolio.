@@ -22,7 +22,7 @@ export default function ContactForm() {
 
     try {
       const res = await axios.post(
-        "https://portfolio-19jc.onrender.com/send-email",
+        "https://portfolio-fu91.onrender.com/send-email",
         formData,
         { headers: { "Content-Type": "application/json" } }
       );

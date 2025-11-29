@@ -17,7 +17,8 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
-  "https://portfolio-lgn7.vercel.app",
+  "https://portfolio-fu91.vercel.app",
+   
 ];
 
 app.use((req, res, next) => {
