@@ -1,65 +1,36 @@
-import express from 'express';
-import cors from 'cors';
-import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import { Resend } from "resend";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Initialize Resend
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 // -------------------------------
-// Email Transporter (Gmail SMTP)
+// CORS CONFIG
 // -------------------------------
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD
-  }
-});
-
-transporter.verify((err) => {
-  if (err) console.error("Email config error:", err);
-  else console.log("Email server ready");
-});
-
-// --------------------------------
-// CORS CONFIG — FIXED & COMPLETE
-// --------------------------------
-
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
- "https://portfolio-lgn7.vercel.app", 
+  "https://portfolio-lgn7.vercel.app",
 ];
 
-// Use manual CORS headers (RELIABLE ON RENDER)
 app.use((req, res, next) => {
   const origin = req.headers.origin;
+  const allowed = allowedOrigins.includes(origin) || /\.vercel\.app$/.test(origin);
 
-  // Allow exact matches OR *.vercel.app
-  const allowed =
-    allowedOrigins.includes(origin) ||
-    /\.vercel\.app$/.test(origin); // wildcard vercel
-
-  if (allowed) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-  }
+  if (allowed) res.setHeader("Access-Control-Allow-Origin", origin);
 
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization"
-  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.setHeader("Access-Control-Allow-Credentials", "true");
 
-  // Respond to preflight OPTIONS
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
+  if (req.method === "OPTIONS") return res.sendStatus(200);
 
   next();
 });
@@ -68,12 +39,9 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// --------------------------------
-// Validation Middleware
-// --------------------------------
+// Validation middleware
 const validateEmailRequest = (req, res, next) => {
   const { name, email, message } = req.body;
-
   if (!name || !email || !message)
     return res.status(400).json({ error: "Missing required fields" });
 
@@ -87,9 +55,9 @@ const validateEmailRequest = (req, res, next) => {
   next();
 };
 
-// --------------------------------
+// -------------------------------
 // Routes
-// --------------------------------
+// -------------------------------
 app.get("/", (req, res) => {
   res.json({ status: "Portfolio email service running" });
 });
@@ -97,31 +65,29 @@ app.get("/", (req, res) => {
 app.post("/send-email", validateEmailRequest, async (req, res) => {
   const { name, email, message } = req.body;
 
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: process.env.RECIPIENT_EMAIL || process.env.EMAIL_USER,
-    replyTo: email,
-    subject: `Portfolio Contact: Message from ${name}`,
-    text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px;">
-        <h2 style="color: #00ff88;">New Contact Message</h2>
-        <div style="background: #f5f5f5; padding: 16px; border-radius: 8px;">
-          <p><strong>Name:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <h3>Message:</h3>
-          <p style="white-space: pre-wrap;">${message}</p>
-        </div>
-      </div>
-    `
-  };
-
   try {
-    await transporter.sendMail(mailOptions);
-    console.log("Email sent from:", email);
+    await resend.emails.send({
+      from: "onboarding@resend.dev",
+      to: process.env.RECIPIENT_EMAIL,
+      reply_to: email,
+      subject: `Portfolio Contact: Message from ${name}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px;">
+          <h2 style="color: #00ff88;">New Contact Message</h2>
+          <div style="background: #f5f5f5; padding: 16px; border-radius: 8px;">
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <h3>Message:</h3>
+            <p style="white-space: pre-wrap;">${message}</p>
+          </div>
+        </div>
+      `,
+    });
+
+    console.log("Email sent via Resend from:", email);
     res.json({ success: true, message: "Email sent successfully" });
   } catch (err) {
-    console.error("Error sending email:", err);
+    console.error("Error sending email with Resend:", err);
     res.status(500).json({ error: "Failed to send email" });
   }
 });
