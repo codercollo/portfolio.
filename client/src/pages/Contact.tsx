@@ -22,15 +22,14 @@ export default function Contact() {
     setError("");
 
     try {
-      const res = await axios.post(
-        "https://portfolio-papk.onrender.com/send-email",
-        formData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+const res = await axios.post(
+  "https://portfolio-19jc.onrender.com/send-email",
+  formData,
+  {
+    headers: { "Content-Type": "application/json" }
+  }
+);
+
 
       if (res.data.success) {
         setStatus("Message sent successfully!");

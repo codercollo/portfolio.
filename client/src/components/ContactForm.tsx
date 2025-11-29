@@ -22,7 +22,8 @@ export default function ContactForm() {
     setStatus("sending");
 
     try {
-      const res = await fetch("http://localhost:3001/send-email", {
+const res = await fetch("https://portfolio-19jc.onrender.com/send-email", {
+
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -33,7 +33,7 @@ transporter.verify((err) => {
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
-  "https://portfolio-lgn7.vercel.app",
+ "https://portfolio-lgn7.vercel.app", 
 ];
 
 // Use manual CORS headers (RELIABLE ON RENDER)
