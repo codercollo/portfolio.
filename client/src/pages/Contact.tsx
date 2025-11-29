@@ -21,7 +21,7 @@ export default function ContactPage() {
 
     try {
       const res = await axios.post(
-        " https://portfolio-fu91.onrender.com/send-email",
+        "https://portfolio-fu91.onrender.com/send-email",
         formData,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -39,7 +39,6 @@ export default function ContactPage() {
       setError(err.response?.data?.error || "Failed to send message. Try again later.");
     }
 
-    // Reset status after 3.5 seconds
     setTimeout(() => {
       setStatus("idle");
       setError("");
@@ -48,38 +47,38 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-[#0d0d0d] text-white">
-{/* Hero Section with Glow Blobs */}
-<section className="relative py-24 md:py-36 px-6 md:px-12 lg:px-16 text-center overflow-hidden">
-  {/* Background Blobs */}
-  <div className="absolute top-0 left-0 w-64 h-64 bg-[#00ff88]/20 rounded-full blur-3xl animate-pulse-slow mix-blend-overlay"></div>
-  <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#4d9fff]/20 rounded-full blur-3xl animate-pulse-slow mix-blend-overlay"></div>
+      {/* Hero Section with Animated Glow Blobs */}
+      <section className="relative py-24 md:py-36 px-6 md:px-12 lg:px-16 text-center overflow-hidden">
+        {/* Glow Blobs */}
+        <div className="absolute top-[-50px] left-[-50px] w-64 h-64 bg-[#00ff88]/20 rounded-full blur-3xl animate-blob mix-blend-overlay"></div>
+        <div className="absolute bottom-[-80px] right-[-80px] w-96 h-96 bg-[#4d9fff]/20 rounded-full blur-3xl animate-blob animation-delay-2000 mix-blend-overlay"></div>
+        <div className="absolute top-[20%] right-[-60px] w-48 h-48 bg-[#ff4da6]/20 rounded-full blur-3xl animate-blob animation-delay-4000 mix-blend-overlay"></div>
 
-  {/* Hero Content */}
-  <div className="relative z-10 max-w-3xl mx-auto">
-    <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold uppercase tracking-tight mb-6 text-white relative inline-block">
-      Let's Talk
-      <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-24 h-1.5 bg-[#00ff88] rounded-full"></span>
-    </h1>
-    <p className="text-lg md:text-xl text-[#888] max-w-2xl mx-auto">
-      Have a project or idea? Drop a message, and I’ll get back to you as soon as possible.
-    </p>
-  </div>
+        {/* Hero Content */}
+        <div className="relative z-10 max-w-3xl mx-auto">
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold uppercase tracking-tight mb-6 text-white relative inline-block">
+            Let's Talk
+            <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-24 h-1.5 bg-[#00ff88] rounded-full"></span>
+          </h1>
+          <p className="text-lg md:text-xl text-[#888] max-w-2xl mx-auto">
+            Have a project or idea? Drop a message, and I’ll get back to you as soon as possible.
+          </p>
+        </div>
 
-  {/* Animated Scroll Arrow */}
-  <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
-    <a href="#contact-form" className="flex flex-col items-center gap-2 animate-bounce">
-      <span className="block w-3 h-3 border-b-2 border-r-2 border-[#00ff88] rotate-45 mb-1"></span>
-      <span className="block w-3 h-3 border-b-2 border-r-2 border-[#00ff88] rotate-45"></span>
-    </a>
-  </div>
-</section>
-
+        {/* Animated Scroll Arrow */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
+          <a href="#contact-form" className="flex flex-col items-center gap-2 animate-bounce">
+            <span className="block w-3 h-3 border-b-2 border-r-2 border-[#00ff88] rotate-45 mb-1"></span>
+            <span className="block w-3 h-3 border-b-2 border-r-2 border-[#00ff88] rotate-45"></span>
+          </a>
+        </div>
+      </section>
 
       {/* Contact Form Section */}
-      <section className="py-20 md:py-32 px-6 md:px-12 lg:px-16 flex justify-center">
+      <section id="contact-form" className="py-20 md:py-32 px-6 md:px-12 lg:px-16 flex justify-center">
         <form
           onSubmit={handleSubmit}
-          className="w-full max-w-xl bg-[#0d0d0d] p-10 md:p-12 rounded-3xl shadow-lg space-y-6"
+          className="w-full max-w-xl bg-[#0d0d0d] p-10 md:p-12 rounded-3xl shadow-lg space-y-6 relative z-10"
         >
           <h2 className="text-3xl md:text-4xl font-bold text-center text-[#00ff88] mb-8">
             Send a Message
@@ -96,7 +95,7 @@ export default function ContactPage() {
               onChange={handleChange}
               disabled={status === "sending"}
               required
-              className="mt-2 w-full px-5 py-4 bg-[#1a1a1a] border-2 border-[#2d2d2d] text-white rounded-lg focus:border-[#00ff88]"
+              className="mt-2 w-full px-5 py-4 bg-[#1a1a1a] border-2 border-[#2d2d2d] text-white rounded-lg focus:border-[#00ff88] transition-all"
             />
           </label>
 
@@ -111,7 +110,7 @@ export default function ContactPage() {
               onChange={handleChange}
               disabled={status === "sending"}
               required
-              className="mt-2 w-full px-5 py-4 bg-[#1a1a1a] border-2 border-[#2d2d2d] text-white rounded-lg focus:border-[#00ff88]"
+              className="mt-2 w-full px-5 py-4 bg-[#1a1a1a] border-2 border-[#2d2d2d] text-white rounded-lg focus:border-[#00ff88] transition-all"
             />
           </label>
 
@@ -126,7 +125,7 @@ export default function ContactPage() {
               onChange={handleChange}
               disabled={status === "sending"}
               required
-              className="mt-2 w-full px-5 py-4 bg-[#1a1a1a] border-2 border-[#2d2d2d] text-white rounded-lg resize-none focus:border-[#00ff88]"
+              className="mt-2 w-full px-5 py-4 bg-[#1a1a1a] border-2 border-[#2d2d2d] text-white rounded-lg resize-none focus:border-[#00ff88] transition-all"
             />
           </label>
 
@@ -135,7 +134,7 @@ export default function ContactPage() {
             <button
               type="submit"
               disabled={status === "sending"}
-              className="px-10 py-4 font-mono bg-[#00ff88] text-[#0d0d0d] rounded-lg uppercase"
+              className="px-10 py-4 font-mono bg-[#00ff88] text-[#0d0d0d] rounded-lg uppercase transition-all hover:scale-105 hover:shadow-xl"
             >
               {status === "sending" ? "Sending..." : "Send Message"}
             </button>
@@ -146,6 +145,26 @@ export default function ContactPage() {
           </div>
         </form>
       </section>
+
+      {/* Tailwind CSS Animations */}
+      <style>
+        {`
+          @keyframes blob {
+            0%, 100% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -20px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+          }
+          .animate-blob {
+            animation: blob 8s infinite;
+          }
+          .animation-delay-2000 {
+            animation-delay: 2s;
+          }
+          .animation-delay-4000 {
+            animation-delay: 4s;
+          }
+        `}
+      </style>
     </div>
   );
 }
