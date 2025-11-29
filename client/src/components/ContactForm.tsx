@@ -1,109 +1,106 @@
 import React, { useState } from "react";
+import axios from "axios";
 
 export default function ContactForm() {
-  const [form, setForm] = useState({
+  const [formData, setFormData] = useState({
     name: "",
     email: "",
     message: "",
   });
 
-  const [status, setStatus] = useState<
-    "idle" | "sending" | "sent" | "error"
-  >("idle");
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [error, setError] = useState("");
 
-  function onChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-  async function onSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setStatus("sending");
+    setError("");
 
     try {
-const res = await fetch("https://portfolio-19jc.onrender.com/send-email", {
+      const res = await axios.post(
+        "https://portfolio-19jc.onrender.com/send-email",
+        formData,
+        { headers: { "Content-Type": "application/json" } }
+      );
 
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
-      });
-
-      if (!res.ok) throw new Error("Failed to send email");
-
-      setStatus("sent");
-      setForm({ name: "", email: "", message: "" });
-
-      setTimeout(() => setStatus("idle"), 3000);
-    } catch (err) {
+      if (res.data.success) {
+        setStatus("sent");
+        setFormData({ name: "", email: "", message: "" });
+      } else {
+        setStatus("error");
+        setError(res.data.error || "Failed to send the message");
+      }
+    } catch (err: any) {
       console.error(err);
       setStatus("error");
-      setTimeout(() => setStatus("idle"), 3000);
+      setError(err.response?.data?.error || "Failed to send message. Try again later.");
     }
-  }
+
+    // Reset status after 3.5 seconds
+    setTimeout(() => {
+      setStatus("idle");
+      setError("");
+    }, 3500);
+  };
 
   return (
-    <form onSubmit={onSubmit} className="max-w-xl">
-      <label className="block mb-6">
-        <span className="text-xs text-[#00ff88] uppercase">Your Name</span>
+    <form onSubmit={handleSubmit} className="max-w-xl mx-auto p-6 bg-[#0d0d0d] rounded-3xl shadow-lg">
+      <h2 className="text-3xl font-bold text-center text-white mb-6">Send a Message</h2>
+
+      <label className="block mb-4">
+        <span className="text-xs text-[#00ff88] uppercase">Name</span>
         <input
+          type="text"
           name="name"
-          value={form.name}
-          onChange={onChange}
+          value={formData.name}
+          onChange={handleChange}
           disabled={status === "sending"}
           required
-          className="mt-2 w-full bg-[#0d0d0d] border-4 border-[#2d2d2d] text-white px-5 py-4"
+          className="mt-2 w-full px-4 py-3 bg-[#1a1a1a] border-2 border-[#2d2d2d] text-white rounded-lg focus:border-[#00ff88]"
         />
       </label>
 
-      <label className="block mb-6">
+      <label className="block mb-4">
         <span className="text-xs text-[#00ff88] uppercase">Email</span>
         <input
-          name="email"
           type="email"
-          value={form.email}
-          onChange={onChange}
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
           disabled={status === "sending"}
           required
-          className="mt-2 w-full bg-[#0d0d0d] border-4 border-[#2d2d2d] text-white px-5 py-4"
+          className="mt-2 w-full px-4 py-3 bg-[#1a1a1a] border-2 border-[#2d2d2d] text-white rounded-lg focus:border-[#00ff88]"
         />
       </label>
 
-      <label className="block mb-8">
+      <label className="block mb-6">
         <span className="text-xs text-[#00ff88] uppercase">Message</span>
         <textarea
           name="message"
+          value={formData.message}
+          onChange={handleChange}
           rows={6}
-          value={form.message}
-          onChange={onChange}
-          required
           disabled={status === "sending"}
-          className="mt-2 w-full bg-[#0d0d0d] border-4 border-[#2d2d2d] text-white px-5 py-4 resize-none"
+          required
+          className="mt-2 w-full px-4 py-3 bg-[#1a1a1a] border-2 border-[#2d2d2d] text-white rounded-lg resize-none focus:border-[#00ff88]"
         />
       </label>
 
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-4">
         <button
-          disabled={status === "sending"}
           type="submit"
-          className="px-10 py-5 font-mono bg-[#00ff88] text-[#0d0d0d] border-4 border-[#00ff88]"
+          disabled={status === "sending"}
+          className="px-8 py-3 font-mono bg-[#00ff88] text-[#0d0d0d] rounded-lg uppercase"
         >
           {status === "sending" ? "Sending..." : "Send Message"}
         </button>
 
-        {status === "sent" && (
-          <span className="text-sm text-[#00ff88] animate-pulse">
-            ✓ Message sent!
-          </span>
-        )}
-
-        {status === "error" && (
-          <span className="text-sm text-red-500">
-            Error sending email!
-          </span>
-        )}
+        {status === "sent" && <span className="text-sm text-[#00ff88] animate-pulse">✓ Message sent!</span>}
+        {status === "error" && <span className="text-sm text-red-500">{error}</span>}
       </div>
     </form>
   );
