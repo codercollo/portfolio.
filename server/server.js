@@ -8,8 +8,11 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// -------------------------------
+// Email Transporter (Gmail SMTP)
+// -------------------------------
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
+  host: "smtp.gmail.com",
   port: 465,
   secure: true,
   auth: {
@@ -18,67 +21,80 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-transporter.verify((error) => {
-  if (error) {
-    console.error('Email configuration error:', error);
-  } else {
-    console.log('Email server ready');
-  }
+transporter.verify((err) => {
+  if (err) console.error("Email config error:", err);
+  else console.log("Email server ready");
 });
 
+// --------------------------------
+// CORS CONFIG — FIXED & COMPLETE
+// --------------------------------
+
 const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:3000',
-  'https://portfolio-lgn7.vercel.app',
-  'https://*.vercel.app'
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://portfolio-lgn7.vercel.app",
 ];
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.some(allowed => {
-      if (allowed.includes('*')) {
-        const pattern = allowed.replace('*', '.*');
-        return new RegExp(pattern).test(origin);
-      }
-      return allowed === origin;
-    })) {
-      callback(null, true);
-    } else {
-      callback(null, true);
-    }
-  },
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-}));
+// Use manual CORS headers (RELIABLE ON RENDER)
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
 
+  // Allow exact matches OR *.vercel.app
+  const allowed =
+    allowedOrigins.includes(origin) ||
+    /\.vercel\.app$/.test(origin); // wildcard vercel
+
+  if (allowed) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization"
+  );
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+
+  // Respond to preflight OPTIONS
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
+
+// Body parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// --------------------------------
+// Validation Middleware
+// --------------------------------
 const validateEmailRequest = (req, res, next) => {
   const { name, email, message } = req.body;
 
-  if (!name || !email || !message) {
-    return res.status(400).json({ error: 'Missing required fields' });
-  }
+  if (!name || !email || !message)
+    return res.status(400).json({ error: "Missing required fields" });
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    return res.status(400).json({ error: 'Invalid email address' });
-  }
+  if (!emailRegex.test(email))
+    return res.status(400).json({ error: "Invalid email address" });
 
-  if (name.length > 100 || message.length > 5000) {
-    return res.status(400).json({ error: 'Field length exceeded' });
-  }
+  if (name.length > 100 || message.length > 5000)
+    return res.status(400).json({ error: "Field length exceeded" });
 
   next();
 };
 
-app.get('/', (req, res) => {
-  res.json({ status: 'Portfolio email service running' });
+// --------------------------------
+// Routes
+// --------------------------------
+app.get("/", (req, res) => {
+  res.json({ status: "Portfolio email service running" });
 });
 
-app.post('/send-email', validateEmailRequest, async (req, res) => {
+app.post("/send-email", validateEmailRequest, async (req, res) => {
   const { name, email, message } = req.body;
 
   const mailOptions = {
@@ -88,11 +104,11 @@ app.post('/send-email', validateEmailRequest, async (req, res) => {
     subject: `Portfolio Contact: Message from ${name}`,
     text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #00ff88;">New Portfolio Contact Message</h2>
-        <div style="background: #f5f5f5; padding: 20px; border-radius: 8px;">
+      <div style="font-family: Arial, sans-serif; max-width: 600px;">
+        <h2 style="color: #00ff88;">New Contact Message</h2>
+        <div style="background: #f5f5f5; padding: 16px; border-radius: 8px;">
           <p><strong>Name:</strong> ${name}</p>
-          <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
+          <p><strong>Email:</strong> ${email}</p>
           <h3>Message:</h3>
           <p style="white-space: pre-wrap;">${message}</p>
         </div>
@@ -102,26 +118,26 @@ app.post('/send-email', validateEmailRequest, async (req, res) => {
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`Email sent from ${email}`);
-    res.status(200).json({ 
-      success: true, 
-      message: 'Email sent successfully' 
-    });
-  } catch (error) {
-    console.error('Error sending email:', error);
-    res.status(500).json({ error: 'Failed to send email' });
+    console.log("Email sent from:", email);
+    res.json({ success: true, message: "Email sent successfully" });
+  } catch (err) {
+    console.error("Error sending email:", err);
+    res.status(500).json({ error: "Failed to send email" });
   }
 });
 
+// 404 handler
 app.use((req, res) => {
-  res.status(404).json({ error: 'Route not found' });
+  res.status(404).json({ error: "Route not found" });
 });
 
+// 500 handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Something went wrong' });
+  console.error("Unexpected server error:", err);
+  res.status(500).json({ error: "Server error" });
 });
 
+// Start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

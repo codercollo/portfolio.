@@ -8,6 +8,7 @@ export default function Contact() {
     message: "",
   });
   const [status, setStatus] = useState("");
+  const [error, setError] = useState("");
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -18,9 +19,10 @@ export default function Contact() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setStatus("Sending...");
+    setError("");
 
     try {
-      await axios.post(
+      const res = await axios.post(
         "https://portfolio-papk.onrender.com/send-email",
         formData,
         {
@@ -30,14 +32,31 @@ export default function Contact() {
         }
       );
 
-      setStatus("Message sent successfully!");
-      setFormData({ name: "", email: "", message: "" });
+      if (res.data.success) {
+        setStatus("Message sent successfully!");
+        setFormData({ name: "", email: "", message: "" });
+      } else {
+        setError("Failed to send the message.");
+      }
 
-      setTimeout(() => setStatus(""), 3000);
-    } catch (error) {
-      console.error(error);
-      setStatus("Failed to send message. Try again later.");
-      setTimeout(() => setStatus(""), 3000);
+      setTimeout(() => {
+        setStatus("");
+        setError("");
+      }, 3500);
+    } catch (err: any) {
+      console.error(err);
+
+      if (err.response?.data?.error) {
+        setError(err.response.data.error);
+      } else {
+        setError("Failed to send message. Try again later.");
+      }
+
+      setTimeout(() => {
+        setError("");
+      }, 4000);
+
+      setStatus("");
     }
   };
 
@@ -121,14 +140,14 @@ export default function Contact() {
               </button>
             </form>
 
+            {/* Success Message */}
             {status && status !== "Sending..." && (
-              <div
-                className={`mt-6 text-center ${
-                  status.includes("success") ? "text-[#00ff88]" : "text-red-500"
-                }`}
-              >
-                {status}
-              </div>
+              <div className="mt-6 text-center text-[#00ff88]">{status}</div>
+            )}
+
+            {/* Error Message */}
+            {error && (
+              <div className="mt-6 text-center text-red-500">{error}</div>
             )}
           </div>
         </div>
